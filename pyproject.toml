@@ -1,0 +1,73 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "idcard-extractor"
+dynamic = ["version"]
+description = "Extract, cross-validate and store data from Iraqi unified national ID cards (front + back) with YOLO, PaddleOCR and MRZ parsing."
+readme = "README.md"
+license = "AGPL-3.0-only"
+license-files = ["LICENSE"]
+# mrzmini (MRZ reader) requires Python 3.12+.
+requires-python = ">=3.12"
+keywords = ["ocr", "id-card", "mrz", "yolo", "paddleocr", "arabic", "iraq"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Natural Language :: Arabic",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+]
+# Compatible ranges; requirements.txt pins the exact tested versions.
+dependencies = [
+    "numpy>=1.24",
+    "opencv-python>=4.7",
+    "ultralytics>=8.4,<9",
+    "paddlepaddle>=3.0,<4",
+    "paddleocr>=3.0,<4",
+    "mrzmini>=0.1",
+    "pytesseract>=0.3.10",
+    "openpyxl>=3.1",
+    "python-dotenv>=1.0",
+    "PyYAML>=6.0",
+    "SQLAlchemy>=2.0.30,<2.1",
+]
+
+[project.optional-dependencies]
+postgres = ["psycopg[binary]>=3.1"]
+mysql = ["PyMySQL>=1.1"]
+mssql = ["pyodbc>=5.0"]
+dev = ["pytest>=8", "ruff>=0.5"]
+
+[project.scripts]
+idcard-extract = "idcard_extractor.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "idcard_extractor.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S"]
+ignore = [
+    "UP045",  # keep Optional[...] for readability
+    "S101",   # assert is fine in tests
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S"]

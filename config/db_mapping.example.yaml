@@ -1,0 +1,89 @@
+# Database mapping: which table receives the extracted cards, and how each
+# column gets its value. Copy this file to config/db_mapping.yaml (ignored by
+# git) and adapt it to your own table. No code changes are needed.
+#
+# Check it against the real table (nothing is written):
+#   idcard-extract db check
+#
+# ---------------------------------------------------------------------------
+# Fields you can use
+# ---------------------------------------------------------------------------
+#   first_name            الاسم
+#   father_name           اسم الأب
+#   grandfather_name      اسم الجد
+#   family_name           اللقب
+#   mother_name           اسم الأم
+#   maternal_grandfather  اسم أب الأم
+#   national_id           الرقم الوطني (12 digits, text)
+#   date_of_birth         تاريخ الميلاد (a date)
+#   birth_place           مكان الولادة
+#   family_number         الرقم العائلي
+#   sex                   الجنس: "ذكر" or "أنثى"
+#   registration_number   رقم القيد / document number (e.g. A12345678)
+#   card_id               internal id of this run, e.g. CARD_004
+#   front_image           file name of the front photo
+#   back_image            file name of the back photo
+#   match_method          national_id or registration_number
+#   processed_at          date and time of processing
+#
+# ---------------------------------------------------------------------------
+# Column options
+# ---------------------------------------------------------------------------
+#   <column>: <field>                   shorthand for {field: <field>}
+#   field: <field>                      copy one field
+#   template: "{first_name} {family_name}"
+#                                       combine fields; empty parts are dropped
+#                                       and spaces collapsed. Format specs work:
+#                                       "{date_of_birth:%d/%m/%Y}"
+#   value: <constant>                   same value for every record
+#   values: {<extracted>: <stored>}     translate values (e.g. sex codes)
+#   default: <value>                    used when the value is empty
+#   format: "%d/%m/%Y"                  store a date field as text in this format
+#   required: true                      reject the record when the value is empty
+#   truncate: true                      cut text longer than the column instead
+#                                       of rejecting the record
+#
+# Column names must exist in the table (letter case may differ). Quote names
+# that YAML could misread, such as yes, no, on, off or numbers.
+
+version: 1
+
+# Target table (and schema, e.g. public or dbo, when your database uses one).
+table: citizens
+# schema: public
+
+# insert        add every card; a duplicate key is reported as a failed record
+# skip_existing add new cards only; cards whose key already exists are skipped
+# upsert        add new cards and update the ones that already exist
+mode: upsert
+
+# Column(s) identifying a card, needed by skip_existing and upsert.
+# They should have a primary key or unique constraint in the database.
+key_columns: [national_no]
+
+# Store empty text as NULL (true) or as an empty string (false).
+empty_as_null: true
+
+columns:
+  national_no:
+    field: national_id
+    required: true
+  fname: first_name
+  father: father_name
+  grandfather: grandfather_name
+  surname: family_name
+  full_name:
+    template: "{first_name} {father_name} {grandfather_name} {family_name}"
+  mother: mother_name
+  mother_father: maternal_grandfather
+  birth_date: date_of_birth          # DATE column: stored as a real date
+  birth_place: birth_place
+  family_no: family_number
+  gender:
+    field: sex
+    values: {"ذكر": "M", "أنثى": "F"}
+  document_no: registration_number
+  source_file: front_image
+  imported_at: processed_at
+  imported_by:
+    value: idcard-extractor

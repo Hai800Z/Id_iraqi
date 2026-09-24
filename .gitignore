@@ -1,0 +1,91 @@
+# ---------------------------------------------------------------------------
+# Personal data. ID card photos, extracted records and logs must never be
+# committed. Keep test fixtures synthetic.
+# ---------------------------------------------------------------------------
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.gif
+*.tif
+*.tiff
+*.webp
+*.heic
+*.pdf
+!docs/images/**
+
+data/
+input/
+inputs/
+output/
+outputs/
+results/
+runs/
+logs/
+*.log
+*.xlsx
+*.xls
+*.csv
+*.jsonl
+*.db
+*.sqlite
+*.sqlite3
+
+# ---------------------------------------------------------------------------
+# Model weights: published as GitHub Release assets, see models/SHA256SUMS.
+# ---------------------------------------------------------------------------
+models/weights/*
+!models/weights/.gitkeep
+*.pt
+*.pth
+*.onnx
+*.engine
+*.pdparams
+*.pdiparams
+*.safetensors
+
+# ---------------------------------------------------------------------------
+# Secrets and local configuration
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+config/db_mapping.yaml
+config/db_mapping.json
+config/*.local.*
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.python-version
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+.ipynb_checkpoints/
+
+# Editors and OS files
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini

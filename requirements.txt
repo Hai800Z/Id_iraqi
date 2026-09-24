@@ -1,0 +1,36 @@
+# Exact, tested versions of the runtime dependencies (Python 3.12+).
+#
+#   pip install -r requirements.txt
+#   pip install -e .
+#
+# PyTorch is installed by ultralytics. For a specific CUDA build, install torch
+# first from https://pytorch.org/get-started/locally/ .
+# For NVIDIA GPUs, replace paddlepaddle with paddlepaddle-gpu from the official
+# PaddlePaddle index: https://www.paddlepaddle.org.cn/en/install/quick
+
+# Detection
+ultralytics==8.4.116            # version the bundled weights were trained with
+
+# OCR
+paddlepaddle==3.3.1
+paddleocr==3.7.0
+paddlex==3.7.2
+mrzmini==0.1.0                  # needs the tesseract binary (see README)
+pytesseract==0.3.13
+
+# Image handling
+# paddlex[ocr-core] pins opencv-contrib-python==4.10.0.84. Both packages install
+# the same cv2 module, so opencv-python must be the very same version.
+opencv-python==4.10.0.84
+numpy==2.3.5                    # paddlex requires numpy<2.4
+
+# Output, configuration, database
+openpyxl==3.1.5
+python-dotenv==1.2.3
+PyYAML==6.0.2                   # pinned exactly by paddlex
+SQLAlchemy==2.0.54
+
+# Database drivers: install only the one you need.
+# psycopg[binary]==3.3.6        # PostgreSQL
+# PyMySQL==1.2.3                # MySQL / MariaDB
+# pyodbc==5.3.0                 # SQL Server (also needs the Microsoft ODBC driver)
