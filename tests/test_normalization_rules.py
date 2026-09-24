@@ -39,7 +39,7 @@ def test_registration_number_normalization():
 @pytest.mark.parametrize(
     ("raw", "expected"),
     [
-        ("ذكر", MALE), ("دكر", MALE), ("ذكرر", MALE), ("M", MALE), ("male", MALE),
+        ("ذكر", MALE), ("دكر", MALE), ("نكر", MALE), ("ذكرر", MALE), ("M", MALE), ("male", MALE),
         ("أنثى", FEMALE), ("انثى", FEMALE), ("انثي", FEMALE), ("f", FEMALE),
         ("<", ""), ("", ""), (None, ""), ("xyz", ""),
     ],

@@ -12,7 +12,8 @@ _ARABIC_DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩", "0123456789")
 MALE = "ذكر"
 FEMALE = "أنثى"
 
-_MALE_VALUES = {"ذكر", "ذکر", "دكر", "دکر", "male", "m"}
+# Includes common dot misreadings of ذكر (ذ read as د or ن).
+_MALE_VALUES = {"ذكر", "ذکر", "دكر", "دکر", "نكر", "male", "m"}
 _FEMALE_VALUES = {"أنثى", "انثى", "انث", "أنث", "انثي", "أنثي", "female", "f"}
 _MALE_FUZZY = ("ذكر", "ذکر", "male")
 _FEMALE_FUZZY = ("أنثى", "انثى", "انث", "female")

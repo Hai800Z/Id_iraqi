@@ -33,7 +33,8 @@ def configure_logging(
         force=True,
     )
     # Third-party libraries are very chatty at INFO.
-    for noisy in ("ultralytics", "paddle", "paddlex", "ppocr", "PIL", "sqlalchemy.engine"):
+    for noisy in ("ultralytics", "paddle", "paddlex", "ppocr", "PIL", "sqlalchemy.engine",
+                  "httpx", "httpx2", "httpcore", "huggingface_hub", "modelscope", "urllib3", "matplotlib"):
         logging.getLogger(noisy).setLevel(logging.WARNING)
 
 

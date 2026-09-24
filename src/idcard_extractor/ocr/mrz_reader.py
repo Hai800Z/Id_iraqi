@@ -1,7 +1,8 @@
 """MRZ reading for the back of the card.
 
-Primary reader: ``mrzmini`` on the MRZ crop.
-Fallback: Tesseract OCR with extra preprocessing + the built-in TD1 parser below.
+Primary reader: ``mrzmini`` on the MRZ crop. When its result is not a TD1 reading
+with verified check digits, Tesseract OCR with extra preprocessing + the built-in
+TD1 parser below is tried too, and the better reading is kept.
 
 Both need the external ``tesseract`` binary (on PATH, or set ``TESSERACT_CMD``).
 Both return a dict with (at least) the keys used downstream:
@@ -25,6 +26,11 @@ _TESSERACT_MISSING = (
 
 MRZ_LABELS = {"mrz", "mrz1", "mrz_1", "mrz-1"}
 TD1_LINE_LENGTH = 30
+# OCR lines accepted as MRZ lines: fillers at the end are often dropped or misread.
+_MRZ_LINE = re.compile(r"[A-Z0-9<]{20,34}")
+_TRAILING_FILLERS = re.compile(r"[<K]+$")
+# Letters OCR commonly reads instead of digits in numeric MRZ fields.
+_DIGIT_FIXES = str.maketrans("OQDIZSBG", "00012586")
 
 
 def is_mrz_field(label: str) -> bool:
@@ -62,14 +68,21 @@ def check_digit(data: str) -> str:
 
 
 def parse_td1(lines: list[str]) -> Optional[dict[str, Any]]:
-    """Parse a 3-line TD1 MRZ. Returns None if the layout is not TD1."""
+    """Parse a 3-line TD1 MRZ. Returns None if the layout is not TD1.
+
+    Tolerates the usual OCR damage: missing fillers at the end of a line, fillers
+    read as 'K' at the end of line 1, and letters read instead of digits in dates.
+    The check digits tell whether the result can be trusted.
+    """
     if len(lines) < 3:
         return None
-    l1, l2, l3 = (line.strip().upper()[:TD1_LINE_LENGTH].ljust(TD1_LINE_LENGTH, "<") for line in lines[:3])
+    raw = [line.strip().upper().replace(" ", "") for line in lines[:3]]
+    raw[0] = _TRAILING_FILLERS.sub(lambda m: "<" * len(m.group()), raw[0])
+    l1, l2, l3 = (line[:TD1_LINE_LENGTH].ljust(TD1_LINE_LENGTH, "<") for line in raw)
 
     number = l1[5:14]
-    dob = l2[0:6]
-    expiry = l2[8:14]
+    dob = l2[0:6].translate(_DIGIT_FIXES)
+    expiry = l2[8:14].translate(_DIGIT_FIXES)
     names = l3.split("<<", 1)
 
     return {
@@ -85,9 +98,9 @@ def parse_td1(lines: list[str]) -> Optional[dict[str, Any]]:
         "optional2": l2[18:29].replace("<", ""),
         "surname": names[0].replace("<", " ").strip(),
         "names": names[1].replace("<", " ").strip() if len(names) > 1 else "",
-        "valid_number": check_digit(number) == l1[14],
-        "valid_date_of_birth": check_digit(dob) == l2[6],
-        "valid_expiration_date": check_digit(expiry) == l2[14],
+        "valid_number": check_digit(number) == l1[14].translate(_DIGIT_FIXES),
+        "valid_date_of_birth": check_digit(dob) == l2[6].translate(_DIGIT_FIXES),
+        "valid_expiration_date": check_digit(expiry) == l2[14].translate(_DIGIT_FIXES),
         "raw_mrz": "\n".join((l1, l2, l3)),
     }
 
@@ -147,16 +160,28 @@ def _read_with_tesseract(image: np.ndarray, tesseract_cmd: Optional[str] = None)
         log.warning("Tesseract fallback failed: %s", exc)
         return None
 
-    lines = [
-        line.strip() for line in text.splitlines()
-        if re.fullmatch(r"[A-Z0-9<]{30,}", line.strip())
-    ]
+    candidates = (line.strip().replace(" ", "") for line in text.splitlines())
+    lines = [line for line in candidates if _MRZ_LINE.fullmatch(line)]
     if len(lines) < 3:
         return None
-    return parse_td1(lines)
+    return parse_td1(lines[-3:])  # the MRZ is the bottom of the crop
+
+
+def mrz_quality(data: Optional[dict]) -> int:
+    """Rank MRZ readings: a TD1 layout plus each check digit that verifies."""
+    if not data:
+        return -1
+    checks = ("valid_number", "valid_date_of_birth", "valid_expiration_date")
+    return 3 * (data.get("mrz_type") == "TD1") + sum(bool(data.get(key)) for key in checks)
 
 
 def read_mrz(image: Optional[np.ndarray], tesseract_cmd: Optional[str] = None) -> Optional[dict]:
+    """Read the MRZ with mrzmini; when that is not a verified TD1 reading, also try
+    the Tesseract fallback and keep the better of the two."""
     if image is None or image.size == 0:
         return None
-    return _read_with_mrzmini(image) or _read_with_tesseract(image, tesseract_cmd)
+    primary = _read_with_mrzmini(image)
+    if mrz_quality(primary) >= 5:  # TD1 with valid document number and date of birth
+        return primary
+    fallback = _read_with_tesseract(image, tesseract_cmd)
+    return max((primary, fallback), key=mrz_quality)  # ties keep mrzmini

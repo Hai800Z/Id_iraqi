@@ -42,7 +42,7 @@ flowchart LR
 | الاتجاه | `detection/orientation.py` | اختيار 0°/90°/180°/270° للوجه من توزيع الحقول، وقلب الظهر إن لم يظهر الـMRZ |
 | الحقول | `detection/field_detector.py` | الوجه: `name dad gf last mom gm gn id id2`، الظهر: `MRZ city nu_f` |
 | قراءة النص | `ocr/text_reader.py` | PaddleOCR بنموذج `arabic_PP-OCRv5_mobile_rec` |
-| الـMRZ | `ocr/mrz_reader.py` | `mrzmini` أولاً، ثم Tesseract مع معالجة إضافية ومحلّل TD1 مدمج |
+| الـMRZ | `ocr/mrz_reader.py` | `mrzmini` أولاً؛ وإن لم تكن قراءته TD1 مؤكدة بأرقام التحقق يُجرَّب Tesseract مع محلّل TD1 مدمج وتُعتمد القراءة الأفضل |
 | الربط والتحقق | `processing/` | ربط الوجهين، ثم قواعد التحقق وبناء السجل النهائي |
 | التصدير | `exporters/excel.py` و`db/` | ملف Excel، وكاتب قاعدة بيانات بربط أعمدة قابل للتخصيص |
 

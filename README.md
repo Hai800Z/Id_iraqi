@@ -59,7 +59,7 @@ flowchart LR
 | Orientation | `detection/orientation.py` | Scores the field layout to choose 0°/90°/180°/270° for the front; flips the back when no MRZ is found. |
 | Field detection | `detection/field_detector.py`, `yolo_utils.py` | Front: `name dad gf last mom gm gn id id2`. Back: `MRZ city nu_f`. |
 | Text OCR | `ocr/text_reader.py` | PaddleOCR `arabic_PP-OCRv5_mobile_rec` on each field crop. |
-| MRZ | `ocr/mrz_reader.py` | `mrzmini` first, then Tesseract with extra preprocessing and a built-in ICAO TD1 parser. |
+| MRZ | `ocr/mrz_reader.py` | `mrzmini`; when its reading is not a TD1 verified by check digits, Tesseract with extra preprocessing and a built-in TD1 parser is tried too, and the better reading is kept. |
 | Pairing | `processing/matching.py` | National ID first, registration number second; unmatched sides are reported. |
 | Validation | `processing/validation.py`, `rules.py` | Cross-checks both sides and builds the final record. |
 | Export | `exporters/excel.py`, `db/` | Excel workbook; database writer with a configurable mapping. |
