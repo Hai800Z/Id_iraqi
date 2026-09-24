@@ -55,48 +55,6 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 # ----------------------------------------------------------------------------
-# Database helpers
-# ----------------------------------------------------------------------------
-
-class DatabaseSetupError(Exception):
-    pass
-
-
-def _open_database(settings: Settings, mapping_arg: Optional[str]):
-    """Return ``(engine, mapping)``; raise DatabaseSetupError with a readable message."""
-    from sqlalchemy.exc import SQLAlchemyError
-
-    from idcard_extractor.db.connection import DatabaseSettings, create_db_engine
-    from idcard_extractor.db.mapping import load_mapping
-
-    mapping_path = Path(mapping_arg) if mapping_arg else settings.db_mapping_file
-    try:
-        mapping = load_mapping(mapping_path)
-        engine = create_db_engine(DatabaseSettings.from_env(), settings.base_dir, settings.mask_pii)
-    except ValueError as exc:  # MappingError, DatabaseConfigError
-        raise DatabaseSetupError(str(exc)) from exc
-    except SQLAlchemyError as exc:
-        raise DatabaseSetupError(f"Cannot create the database engine: {type(exc).__name__}") from exc
-    return engine, mapping
-
-
-def _prepare_writer(settings: Settings, mapping_arg: Optional[str], failed_records_file: Optional[Path]):
-    from sqlalchemy.exc import SQLAlchemyError
-
-    from idcard_extractor.db.writer import DatabaseWriter, describe_db_error
-
-    engine, mapping = _open_database(settings, mapping_arg)
-    writer = DatabaseWriter(engine, mapping, failed_records_file)
-    try:
-        writer.prepare()
-    except ValueError as exc:  # MappingError
-        raise DatabaseSetupError(str(exc)) from exc
-    except SQLAlchemyError as exc:
-        raise DatabaseSetupError(f"Cannot reach the database: {describe_db_error(exc)}") from exc
-    return writer
-
-
-# ----------------------------------------------------------------------------
 # Commands
 # ----------------------------------------------------------------------------
 
@@ -112,8 +70,10 @@ def cmd_run(args, settings: Settings) -> int:
     writer = None
     problems: list[str] = []
     if args.db:
+        from idcard_extractor.db.setup import DatabaseSetupError, prepare_writer
+
         try:
-            writer = _prepare_writer(settings, args.mapping, settings.db_failed_records_file)
+            writer = prepare_writer(settings, args.mapping, settings.db_failed_records_file)
         except DatabaseSetupError as exc:
             log.error("%s", exc)
             log.error("The database stage is disabled for this run; the other outputs are still produced")
@@ -168,10 +128,11 @@ def cmd_run(args, settings: Settings) -> int:
 def cmd_db_check(args, settings: Settings) -> int:
     from sqlalchemy.exc import SQLAlchemyError
 
+    from idcard_extractor.db.setup import DatabaseSetupError, open_database
     from idcard_extractor.db.writer import DatabaseWriter, describe_db_error
 
     try:
-        engine, mapping = _open_database(settings, args.mapping)
+        engine, mapping = open_database(settings, args.mapping)
         issues = DatabaseWriter(engine, mapping).check()
     except DatabaseSetupError as exc:
         print(exc, file=sys.stderr)
@@ -191,10 +152,11 @@ def cmd_db_check(args, settings: Settings) -> int:
 def cmd_db_init(args, settings: Settings) -> int:
     from sqlalchemy.exc import SQLAlchemyError
 
+    from idcard_extractor.db.setup import DatabaseSetupError, open_database
     from idcard_extractor.db.writer import create_table, describe_db_error
 
     try:
-        engine, mapping = _open_database(settings, args.mapping)
+        engine, mapping = open_database(settings, args.mapping)
         created = create_table(engine, mapping)
     except DatabaseSetupError as exc:
         print(exc, file=sys.stderr)
@@ -211,6 +173,7 @@ def cmd_db_init(args, settings: Settings) -> int:
 
 
 def cmd_db_retry(args, settings: Settings) -> int:
+    from idcard_extractor.db.setup import DatabaseSetupError, prepare_writer
     from idcard_extractor.db.writer import load_failed_records, replace_failed_records
 
     path = Path(args.file) if args.file else settings.db_failed_records_file
@@ -227,7 +190,7 @@ def cmd_db_retry(args, settings: Settings) -> int:
         return EXIT_OK
 
     try:
-        writer = _prepare_writer(settings, args.mapping, failed_records_file=None)
+        writer = prepare_writer(settings, args.mapping, failed_records_file=None)
     except DatabaseSetupError as exc:
         print(exc, file=sys.stderr)
         return EXIT_ERROR

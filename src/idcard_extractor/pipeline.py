@@ -9,8 +9,9 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from pathlib import Path
+from typing import Optional
 
 from idcard_extractor.config import Settings
 from idcard_extractor.logging_utils import mask
@@ -170,16 +171,24 @@ class CardPipeline:
 
     # ------------------------------------------------------------------- run
 
-    def run(self, images: Iterable[Path]) -> PipelineResult:
+    def run(
+        self,
+        images: Iterable[Path],
+        progress: Optional[Callable[[int, int, Path], None]] = None,
+    ) -> PipelineResult:
+        """Process ``images``; ``progress(done, total, path)`` is called after each one."""
         if self._findcard is None:
             self.load_models()
 
+        paths = [Path(p) for p in images]
         result = PipelineResult()
-        for path in images:
+        for done, path in enumerate(paths, start=1):
             try:
-                result.sides.extend(self.process_image(Path(path)))
+                result.sides.extend(self.process_image(path))
             except Exception:
-                log.exception("Failed to process image %s", Path(path).name)
+                log.exception("Failed to process image %s", path.name)
+            if progress:
+                progress(done, len(paths), path)
 
         accepted, rejected = combine_sides(result.sides)
         result.accepted, result.rejected = accepted, rejected

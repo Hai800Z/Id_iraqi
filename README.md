@@ -72,6 +72,7 @@ The FindCard model also recognizes other documents (`addres`, `car`, `drive`). T
 idcard-extractor/
 ├── src/idcard_extractor/
 │   ├── cli.py                 command line: run, db check / init / retry
+│   ├── gui.py                 desktop interface (Tkinter)
 │   ├── config.py              settings from environment variables / .env
 │   ├── pipeline.py            end-to-end orchestration
 │   ├── models.py              data classes shared by all stages
@@ -79,8 +80,9 @@ idcard-extractor/
 │   ├── ocr/                   PaddleOCR text, MRZ reading and TD1 parsing
 │   ├── processing/            normalization, rules, pairing, validation
 │   ├── exporters/             Excel output
-│   └── db/                    connection, mapping, writer
+│   └── db/                    connection, mapping, writer, setup
 ├── config/db_mapping.example.yaml
+├── run_gui.bat                Windows launcher of the desktop interface
 ├── models/SHA256SUMS          checksums of the model weights
 ├── scripts/download_weights.py
 ├── tests/                     unit and integration tests (synthetic data)
@@ -130,6 +132,20 @@ cp .env.example .env               # then edit it
 </details>
 
 ## Usage
+
+### Desktop interface
+
+![Desktop interface](docs/images/gui.png)
+
+On Windows, double-click **`run_gui.bat`**. Elsewhere, run `idcard-extract-gui` (or `python -m idcard_extractor.gui`).
+
+1. Add photos or folders.
+2. Optionally choose the Excel file and tick the database option.
+3. Press **ابدأ المعالجة** (start).
+
+The models load once, on the first run. Progress, the log, the accepted/rejected counts and a button to open the Excel file are shown in the window.
+
+### Command line
 
 ```bash
 # Process every image in a folder (sub-folders included) and write Excel

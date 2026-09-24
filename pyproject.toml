@@ -46,6 +46,9 @@ dev = ["pytest>=8", "ruff>=0.5"]
 [project.scripts]
 idcard-extract = "idcard_extractor.cli:main"
 
+[project.gui-scripts]
+idcard-extract-gui = "idcard_extractor.gui:main"
+
 [tool.setuptools.dynamic]
 version = { attr = "idcard_extractor.__version__" }
 
