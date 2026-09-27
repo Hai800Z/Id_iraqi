@@ -43,6 +43,11 @@ mysql = ["PyMySQL>=1.1"]
 mssql = ["pyodbc>=5.0"]
 dev = ["pytest>=8", "ruff>=0.5"]
 
+[project.urls]
+Homepage = "https://github.com/Hai800Z/Id_iraqi"
+Repository = "https://github.com/Hai800Z/Id_iraqi"
+Issues = "https://github.com/Hai800Z/Id_iraqi/issues"
+
 [project.scripts]
 idcard-extract = "idcard_extractor.cli:main"
 

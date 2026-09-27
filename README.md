@@ -105,15 +105,15 @@ idcard-extractor/
 **Steps**
 
 ```bash
-git clone https://github.com/<owner>/<repo>.git
-cd <repo>
+git clone https://github.com/Hai800Z/Id_iraqi.git
+cd Id_iraqi
 python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 pip install -e .
 
 # Model weights (see "Model weights")
-python scripts/download_weights.py --base-url https://github.com/<owner>/<repo>/releases/download/v1.0.0
+python scripts/download_weights.py --base-url https://github.com/Hai800Z/Id_iraqi/releases/download/v1.0.0
 
 cp .env.example .env               # then edit it
 ```
@@ -123,10 +123,10 @@ cp .env.example .env               # then edit it
 
 ```python
 !apt-get -qq install -y tesseract-ocr
-!git clone https://github.com/<owner>/<repo>.git
-%cd <repo>
+!git clone https://github.com/Hai800Z/Id_iraqi.git
+%cd Id_iraqi
 !pip install -q -r requirements.txt && pip install -q -e .
-!python scripts/download_weights.py --base-url https://github.com/<owner>/<repo>/releases/download/v1.0.0
+!python scripts/download_weights.py --base-url https://github.com/Hai800Z/Id_iraqi/releases/download/v1.0.0
 !idcard-extract run /content/images --excel /content/cards.xlsx
 ```
 </details>
@@ -378,7 +378,7 @@ The weights are not stored in git. They are published as release assets, and `mo
 | `MRZ1.pt` | YOLOv8s | `MRZ`, `city`, `nu_f` |
 
 ```bash
-python scripts/download_weights.py --base-url https://github.com/<owner>/<repo>/releases/download/v1.0.0
+python scripts/download_weights.py --base-url https://github.com/Hai800Z/Id_iraqi/releases/download/v1.0.0
 python scripts/download_weights.py --verify    # check files already present
 ```
 

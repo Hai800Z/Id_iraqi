@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Download the model weights from a release and verify their SHA-256 checksums.
 
-    python scripts/download_weights.py --base-url https://github.com/<owner>/<repo>/releases/download/<tag>
+    python scripts/download_weights.py --base-url https://github.com/Hai800Z/Id_iraqi/releases/download/v1.0.0
     python scripts/download_weights.py --verify
 
 The expected files and checksums are listed in models/SHA256SUMS.

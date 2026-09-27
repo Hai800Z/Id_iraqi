@@ -62,14 +62,14 @@ flowchart LR
 **الخطوات**
 
 ```bash
-git clone https://github.com/<owner>/<repo>.git
-cd <repo>
+git clone https://github.com/Hai800Z/Id_iraqi.git
+cd Id_iraqi
 python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 pip install -e .
 
-python scripts/download_weights.py --base-url https://github.com/<owner>/<repo>/releases/download/v1.0.0
+python scripts/download_weights.py --base-url https://github.com/Hai800Z/Id_iraqi/releases/download/v1.0.0
 
 cp .env.example .env               # ثم عدّل القيم
 ```
@@ -79,10 +79,10 @@ cp .env.example .env               # ثم عدّل القيم
 
 ```python
 !apt-get -qq install -y tesseract-ocr
-!git clone https://github.com/<owner>/<repo>.git
-%cd <repo>
+!git clone https://github.com/Hai800Z/Id_iraqi.git
+%cd Id_iraqi
 !pip install -q -r requirements.txt && pip install -q -e .
-!python scripts/download_weights.py --base-url https://github.com/<owner>/<repo>/releases/download/v1.0.0
+!python scripts/download_weights.py --base-url https://github.com/Hai800Z/Id_iraqi/releases/download/v1.0.0
 !idcard-extract run /content/images --excel /content/cards.xlsx
 ```
 </details>
@@ -301,7 +301,7 @@ ruff check .
 الأوزان غير محفوظة في git. تُنشر كملفات مرفقة بالإصدار (Release)، ويثبّت الملف `models/SHA256SUMS` بصماتها:
 
 ```bash
-python scripts/download_weights.py --base-url https://github.com/<owner>/<repo>/releases/download/v1.0.0
+python scripts/download_weights.py --base-url https://github.com/Hai800Z/Id_iraqi/releases/download/v1.0.0
 python scripts/download_weights.py --verify    # التحقق من الملفات الموجودة
 ```
 
