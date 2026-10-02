@@ -1,6 +1,6 @@
 # idcard-extractor
 
-Read Iraqi unified national ID cards from photos, pair each **front** with its **back**, cross-validate the two sides, and export the verified identities to **Excel** and to **your own database table***.
+Read Iraqi unified national ID cards from photos, pair each **front** with its **back**, cross-validate the two sides, and export the verified identities to **Excel** and to **your own database table**.
 
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
 ![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)
